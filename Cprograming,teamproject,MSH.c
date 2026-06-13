@@ -17,7 +17,8 @@ typedef struct {
 } Standard;
 
 typedef struct {
-    char name[30];
+    char type[30];      // Etcher, CVD, Lithography, CMP
+    char id[30];        // Etcher01, CVD01
     char process[30];
     Standard standard;
     int temperature;
@@ -30,8 +31,8 @@ typedef struct {
 } Equipment;
 
 void printMenu();
-int setDefaultStandard(char name[], Standard* std, char process[]);
-void inputCustomStandard(Standard* std);
+int setDefaultStandard(char type[], Standard* standard, char process[]);
+void inputCustomStandard(Standard* standard);
 void inputEquipment(Equipment* list, int* count, int maxCount);
 int checkStatus(Equipment* eq);
 void setFinalStatus(Equipment* eq);
@@ -99,66 +100,66 @@ void printMenu() {
     printf("Select menu: ");
 }
 
-int setDefaultStandard(char name[], Standard* std, char process[]) {
-    if (strcmp(name, "Etcher") == 0 || strcmp(name, "etcher") == 0) {
+int setDefaultStandard(char type[], Standard* standard, char process[]) {
+    if (strcmp(type, "Etcher") == 0 || strcmp(type, "etcher") == 0) {
         strcpy(process, "Etching");
-        std->tempMin = 20;  std->tempMax = 90;
-        std->voltMin = 180; std->voltMax = 240;
-        std->pressMin = 40; std->pressMax = 100;
-        std->vibMin = 0;    std->vibMax = 30;
+        standard->tempMin = 20;  standard->tempMax = 90;
+        standard->voltMin = 180; standard->voltMax = 240;
+        standard->pressMin = 40; standard->pressMax = 100;
+        standard->vibMin = 0;    standard->vibMax = 30;
         return 1;
     }
-    else if (strcmp(name, "CVD") == 0 || strcmp(name, "cvd") == 0) {
+    else if (strcmp(type, "CVD") == 0 || strcmp(type, "cvd") == 0) {
         strcpy(process, "Deposition");
-        std->tempMin = 30;  std->tempMax = 120;
-        std->voltMin = 180; std->voltMax = 240;
-        std->pressMin = 30; std->pressMax = 110;
-        std->vibMin = 0;    std->vibMax = 35;
+        standard->tempMin = 30;  standard->tempMax = 120;
+        standard->voltMin = 180; standard->voltMax = 240;
+        standard->pressMin = 30; standard->pressMax = 110;
+        standard->vibMin = 0;    standard->vibMax = 35;
         return 1;
     }
-    else if (strcmp(name, "Lithography") == 0 || strcmp(name, "lithography") == 0) {
+    else if (strcmp(type, "Lithography") == 0 || strcmp(type, "lithography") == 0) {
         strcpy(process, "Exposure");
-        std->tempMin = 20;  std->tempMax = 70;
-        std->voltMin = 190; std->voltMax = 230;
-        std->pressMin = 50; std->pressMax = 100;
-        std->vibMin = 0;    std->vibMax = 20;
+        standard->tempMin = 20;  standard->tempMax = 70;
+        standard->voltMin = 190; standard->voltMax = 230;
+        standard->pressMin = 50; standard->pressMax = 100;
+        standard->vibMin = 0;    standard->vibMax = 20;
         return 1;
     }
-    else if (strcmp(name, "CMP") == 0 || strcmp(name, "cmp") == 0) {
+    else if (strcmp(type, "CMP") == 0 || strcmp(type, "cmp") == 0) {
         strcpy(process, "Planarization");
-        std->tempMin = 20;  std->tempMax = 80;
-        std->voltMin = 180; std->voltMax = 240;
-        std->pressMin = 40; std->pressMax = 120;
-        std->vibMin = 0;    std->vibMax = 40;
+        standard->tempMin = 20;  standard->tempMax = 80;
+        standard->voltMin = 180; standard->voltMax = 240;
+        standard->pressMin = 40; standard->pressMax = 120;
+        standard->vibMin = 0;    standard->vibMax = 40;
         return 1;
     }
 
     return 0;
 }
 
-void inputCustomStandard(Standard* std) {
-    printf("\nThis equipment is not registered.\n");
+void inputCustomStandard(Standard* standard) {
+    printf("\nThis equipment type is not registered.\n");
     printf("Input custom standard range.\n");
 
     printf("Temperature min: ");
-    scanf("%d", &std->tempMin);
+    scanf("%d", &standard->tempMin);
     printf("Temperature max: ");
-    scanf("%d", &std->tempMax);
+    scanf("%d", &standard->tempMax);
 
     printf("Voltage min: ");
-    scanf("%d", &std->voltMin);
+    scanf("%d", &standard->voltMin);
     printf("Voltage max: ");
-    scanf("%d", &std->voltMax);
+    scanf("%d", &standard->voltMax);
 
     printf("Pressure min: ");
-    scanf("%d", &std->pressMin);
+    scanf("%d", &standard->pressMin);
     printf("Pressure max: ");
-    scanf("%d", &std->pressMax);
+    scanf("%d", &standard->pressMax);
 
     printf("Vibration min: ");
-    scanf("%d", &std->vibMin);
+    scanf("%d", &standard->vibMin);
     printf("Vibration max: ");
-    scanf("%d", &std->vibMax);
+    scanf("%d", &standard->vibMax);
 }
 
 void inputEquipment(Equipment* list, int* count, int maxCount) {
@@ -170,13 +171,16 @@ void inputEquipment(Equipment* list, int* count, int maxCount) {
         return;
     }
 
-    printf("\nEquipment name(Etcher/CVD/Lithography/CMP/etc): ");
-    scanf("%s", eq.name);
+    printf("\nEquipment type(Etcher/CVD/Lithography/CMP/etc): ");
+    scanf("%s", eq.type);
 
-    isRegistered = setDefaultStandard(eq.name, &eq.standard, eq.process);
+    printf("Equipment ID(Ex: Etcher01, CVD02): ");
+    scanf("%s", eq.id);
+
+    isRegistered = setDefaultStandard(eq.type, &eq.standard, eq.process);
 
     if (isRegistered == 1) {
-        printf("Registered equipment. Default standard applied.\n");
+        printf("Registered equipment type. Default standard applied.\n");
     }
     else {
         printf("Process type: ");
@@ -261,7 +265,8 @@ void setFinalStatus(Equipment* eq) {
 
 void printOneEquipment(Equipment eq) {
     printf("\n-----------------------------\n");
-    printf("Name: %s\n", eq.name);
+    printf("Equipment ID: %s\n", eq.id);
+    printf("Equipment Type: %s\n", eq.type);
     printf("Process: %s\n", eq.process);
 
     printf("[Standard Range]\n");
@@ -391,7 +396,8 @@ void saveToFile(Equipment* list, int count) {
 
     for (i = 0; i < count; i++) {
         fprintf(fp, "\n-----------------------------\n");
-        fprintf(fp, "Name: %s\n", list[i].name);
+        fprintf(fp, "Equipment ID: %s\n", list[i].id);
+        fprintf(fp, "Equipment Type: %s\n", list[i].type);
         fprintf(fp, "Process: %s\n", list[i].process);
 
         fprintf(fp, "[Standard Range]\n");
@@ -410,6 +416,7 @@ void saveToFile(Equipment* list, int count) {
         fprintf(fp, "Final Status: %s\n", list[i].finalStatus);
 
         fprintf(fp, "Error Type: ");
+
         if (list[i].errorCode == 0) {
             fprintf(fp, "None");
         }
